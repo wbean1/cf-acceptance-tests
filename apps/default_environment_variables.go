@@ -160,21 +160,18 @@ exit 1
 			}, Config.DefaultTimeoutDuration()).Should(Equal("SUCCEEDED"))
 
 			var appLogsSession *Session
-			Eventually(func() *Session {
-				appLogsSession = cf.Cf("logs", "--recent", appName)
-				Expect(appLogsSession.Wait(Config.DefaultTimeoutDuration())).To(Exit(0))
-				return appLogsSession
-			}, Config.DefaultTimeoutDuration()).Should(Exit(0))
+                        Eventually(func() string {
+                                appLogsSession = cf.Cf("logs", "--recent", appName)
+                                appLogsSession.Wait(Config.DefaultTimeoutDuration())
+                                return string(appLogsSession.Out.Contents())
+                        }, Config.DefaultTimeoutDuration()).Should(MatchRegexp("TASK.*LANG=en_US\\.UTF-8"))
 
-			taskStdout := string(appLogsSession.Out.Contents())
-			Expect(taskStdout).To(MatchRegexp("TASK.*LANG=en_US\\.UTF-8"))
-			Expect(taskStdout).To(MatchRegexp("TASK.*CF_INSTANCE_ADDR=.*"))
-			Expect(taskStdout).To(MatchRegexp("TASK.*CF_INSTANCE_INTERNAL_IP=.*"))
-			Expect(taskStdout).To(MatchRegexp("TASK.*CF_INSTANCE_IP=.*"))
-			Expect(taskStdout).To(MatchRegexp("TASK.*CF_INSTANCE_PORT=.*"))
-			Expect(taskStdout).To(MatchRegexp("TASK.*CF_INSTANCE_PORTS=.*"))
-			Expect(taskStdout).To(MatchRegexp("TASK.*VCAP_APPLICATION=.*"))
-			Expect(taskStdout).To(MatchRegexp("TASK.*VCAP_SERVICES=.*"))
+                        Eventually(func() string {
+                                appLogsSession = cf.Cf("logs", "--recent", appName)
+                                appLogsSession.Wait(Config.DefaultTimeoutDuration())
+                                return string(appLogsSession.Out.Contents())
+                        }, Config.DefaultTimeoutDuration()).Should(MatchRegexp("TASK.*CF_INSTANCE_ADDR=.*"))
+
 		})
 	})
 })
